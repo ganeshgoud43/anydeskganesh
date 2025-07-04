@@ -1,0 +1,86 @@
+pipeline
+{
+    agent any
+    stages
+    {
+        stage('Download')
+        {
+            steps
+            {
+                script{
+                    try{
+                        git 'https://github.com/IntelliqDevops/maven.git'
+                    }
+                    catch(Exception e1){
+                        mail bcc: '', body: 'error', cc: '', from: '', replyTo: '', subject: 'git prob', to: 'git@gmail.com'
+                        exit(1)
+                    }
+                }
+               
+            }
+        }
+        stage('Build')
+        {
+            steps
+            {
+                script{
+                    try{
+                        sh 'mvn package'
+                    }
+                    catch(Exception e2){
+                        mail bcc: '', body: 'error', cc: '', from: '', replyTo: '', subject: 'git prob', to: 'dev@gmail.com'
+                        exit(1)
+                    }
+                }
+               
+            }
+        }
+        stage('Deployment')
+        {
+            steps
+            {
+                script{
+                    try{
+                        sh 'scp /var/lib/jenkins/workspace/Declarative_pipeline/webapp/target/webapp.war ubuntu@172.31.6.204:/var/lib/tomcat10/webapps/testapp.war'
+                    }
+                    catch(Exception e3){
+                        mail bcc: '', body: 'error', cc: '', from: '', replyTo: '', subject: 'git prob', to: 'dev@gmail.com'
+                        exit(1)
+                    }
+                }
+            }
+        }
+        stage('Testing')
+        {
+            steps
+            {
+                script{
+                    try{
+                        git 'https://github.com/IntelliqDevops/FunctionalTesting.git'
+                        sh 'java -jar /var/lib/jenkins/workspace/Declarative_pipeline/testing.jar'
+                    }
+                    catch(Exception e4){
+                        mail bcc: '', body: 'error', cc: '', from: '', replyTo: '', subject: 'git prob', to: 'dev@gmail.com'
+                        exit(1)
+                    }
+                }
+            }
+        }
+        stage('Delivery')
+        {
+         steps
+         {
+             script{
+                 try{
+                     sh 'scp /var/lib/jenkins/workspace/Declarative_pipeline/webapp/target/webapp.war ubuntu@172.31.13.234:/var/lib/tomcat10/webapps/myprodapp.war'
+                 }
+                 catch(Exception e5){
+                     mail bcc: '', body: 'error', cc: '', from: '', replyTo: '', subject: 'git prob', to: 'dev@gmail.com'
+                 }
+             }
+         }
+    }
+}
+}
+
+
